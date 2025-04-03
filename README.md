@@ -59,33 +59,44 @@ DELETE FROM retail_sales WHERE
 
 1. **Total Sales by Category**:
 ```sql
-SELECT category, SUM(total_sale) as total_sales
+SELECT 
+	category,
+	SUM(total_sale) as net_sale,
+	count(*) as total_orders
 FROM retail_sales_tb
-GROUP BY category
-ORDER BY total_sales DESC;
+GROUP BY 1
 ```
 
 2. **Top 5 Customers by Sales**:
 ```sql
-SELECT customer_id, SUM(total_sale) as total_spent
+SELECT
+	customer_id,
+	SUM(total_sale) as total_sales
 FROM retail_sales_tb
-GROUP BY customer_id
-ORDER BY total_spent DESC
-LIMIT 5;
+group by 1
+order by 2 desc
 ```
 
-3. **Peak Sales Hours**:
+3. **Peak Sales Hours: Create each shift and num of orders (Ex: Morning <= 12, Afternoon between 12 & Evening > 17)**:
 ```sql
-SELECT
-    CASE
-        WHEN EXTRACT(HOUR FROM sale_time) < 12 THEN 'Morning'
-        WHEN EXTRACT(HOUR FROM sale_time) BETWEEN 12 AND 17 THEN 'Afternoon'
-        ELSE 'Evening'
-    END AS time_of_day,
-    COUNT(*) AS total_orders
+WITH hourly_sale
+as
+(
+SELECT *,
+	CASE 
+		WHEN EXTRACT(HOUR FROM sale_time) < 12 THEN 'Morning'
+		WHEN EXTRACT(HOUR FROM sale_time) BETWEEN 12 AND 17 THEN 'Afternoon'
+		ELSE 'Evening'
+	END AS shift
 FROM retail_sales_tb
-GROUP BY time_of_day;
+)
+SELECT 
+	shift,
+	count(*) as total_orders
+FROM hourly_sale
+group by shift
 ```
+Note: The all questions answers are here:`SQL_query_proj01.sql`.
 
 ## Reports & Findings
 - **Top-selling categories**: Identify which product categories generate the most revenue.
